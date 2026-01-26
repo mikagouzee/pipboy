@@ -1,0 +1,6 @@
+@Pipboy_HostAddress = http://localhost:5072
+
+GET {{Pipboy_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
