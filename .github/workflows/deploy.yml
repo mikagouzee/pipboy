@@ -33,7 +33,7 @@ jobs:
           dotnet publish src/PipBoy.Server/Pipboy.csproj \
             -c Release \
             -o ./publish \
-            -r linux-arm \            
+            -r linux-arm \
             --self-contained false \
 
       - name: Upload Artifact
