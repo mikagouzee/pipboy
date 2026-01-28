@@ -32,8 +32,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pipboy-bundle
-          path: ./publish
+          name: pipboy-bundle # Name of the artifact zip
+          path: ./publish #must correspond to the output folder of the publish step
 
   deploy:
     needs: build
@@ -42,10 +42,10 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          name: pipboy-bundle
-          path: ./app
+          name: pipboy-bundle # Name of the artifact zip
+          path: ./app  # Destination folder on the Pi. Magically knows it must take the artifact from .publish
 
       - name: Permissions & Restart
         run: |
-          chmod +x ./app/PipBoy.Server
+          chmod +x ./app/PipBoy
           echo "App is updated in ~/actions-runner/_work/${{ github.event.repository.name }}/${{ github.event.repository.name }}/app"
