@@ -26,8 +26,15 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
+      # Targeting Raspberry Pi architecture
+      # bundle to false as we installed .NET on the Pi already
       - name: Publish Backend
-        run: dotnet publish src/PipBoy.Server/Pipboy.csproj -c Release -o ./publish
+        run: |
+          dotnet publish src/PipBoy.Server/Pipboy.csproj \
+            -c Release \
+            -o ./publish \
+            -r linux-arm \            
+            --self-contained false \
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
