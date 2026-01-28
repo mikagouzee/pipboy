@@ -1,0 +1,36 @@
+name: Deploy PipBoy to Pi
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted # This targets the agent that's on the PI
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build Frontend
+        run: |
+          cd PipBoy.Client
+          npm install
+          npm run build
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish Backend
+        run: dotnet publish PipBoy.Server/PipBoy.Server.csproj -c Release -o ./publish
+
+      - name: Restart PipBoy Service
+        run: |
+          # We will set up the systemd service in the next step
+          echo "Build finished. Ready for service restart."
