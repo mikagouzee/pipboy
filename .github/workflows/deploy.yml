@@ -5,11 +5,10 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:
-    runs-on: self-hosted # This targets the agent that's on the PI
+  build:
+    runs-on: ubuntu-latest # This builds on GitHub's servers rather than the PI, due to restricted resources
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -30,7 +29,23 @@ jobs:
       - name: Publish Backend
         run: dotnet publish PipBoy.Server/PipBoy.Server.csproj -c Release -o ./publish
 
-      - name: Restart PipBoy Service
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipboy-bundle
+          path: ./publish
+
+  deploy:
+    needs: build
+    runs-on: self-hosted # This runs on the Pi
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pipboy-bundle
+          path: ./app
+
+      - name: Permissions & Restart
         run: |
-          # We will set up the systemd service in the next step
-          echo "Build finished. Ready for service restart."
+          chmod +x ./app/PipBoy.Server
+          echo "App is updated in ~/actions-runner/_work/${{ github.event.repository.name }}/${{ github.event.repository.name }}/app"
