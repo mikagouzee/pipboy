@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: '../PipBoy.Server/wwwroot',
-    emptyOutDir: true
+    emptyOutDir: true,
+    cssCodeSplit: false, // this will include your CSS in the JS bundle
   },
 })
