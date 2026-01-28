@@ -17,7 +17,7 @@ jobs:
 
       - name: Build Frontend
         run: |
-          cd PipBoy.Client
+          cd src/PipBoy.Client
           npm install
           npm run build
 
@@ -27,7 +27,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Publish Backend
-        run: dotnet publish PipBoy.Server/PipBoy.Server.csproj -c Release -o ./publish
+        run: dotnet publish src/PipBoy.Server/PipBoy.Server.csproj -c Release -o ./publish
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
