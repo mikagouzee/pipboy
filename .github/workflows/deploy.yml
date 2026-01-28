@@ -47,5 +47,5 @@ jobs:
 
       - name: Permissions & Restart
         run: |
-          chmod +x ./app/PipBoy
+          chmod +x ./app/Pipboy
           echo "App is updated in ~/actions-runner/_work/${{ github.event.repository.name }}/${{ github.event.repository.name }}/app"
