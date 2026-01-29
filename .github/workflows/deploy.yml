@@ -34,7 +34,7 @@ jobs:
             -c Release \
             -o ./publish \
             -r linux-arm \
-            --self-contained false \
+            --self-contained false
 
           mkdir -p ./publish/scripts
           cp ./src/scripts/launch_pipboy.sh ./publish/scripts/
@@ -63,6 +63,11 @@ jobs:
 
       - name : Verify Download
         run: ls -R ${{ github.workspace }}/app
+        
+      - name: Sync Systemd service
+        run: |
+          sudo cp ${{ github.workspace }}/app/pipboy.service /etc/systemd/system/pipboy.service
+          sudo systemctl daemon-reload
 
       - name: Permissions & Restart
         run: |
@@ -72,4 +77,6 @@ jobs:
 
       - name: Start app
         run : |
-          sudo systemctl start pipboy.service || echo "Service failed to start"
+          sudo systemctl start pipboy.service
+          sleep 2
+          sudo systemctl is-active pipboy.service
