@@ -12,6 +12,10 @@ KillSignal=SIGINT
 SyslogIdentifier=pipboy-app
 User=vaultdweller
 Environment=ASPNETCORE_ENVIRONMENT=Production
+# Add these two lines (adjust path if your .dotnet is elsewhere):
+Environment=DOTNET_ROOT=/home/vaultdweller/.dotnet
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/vaultdweller/.dotnet
+
 
 [Install]
 WantedBy=multi-user.target

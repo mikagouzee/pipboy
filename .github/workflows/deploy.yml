@@ -40,7 +40,6 @@ jobs:
           cp ./src/scripts/launch_pipboy.sh ./publish/scripts/
           cp ./src/scripts/pipboy.service ./publish/scripts/
           chmod +x ./publish/scripts/launch_pipboy.sh
-          chmod +x ./publish/scripts/pipboy.service
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -71,6 +70,7 @@ jobs:
           set -x
           ls -lh ${{ github.workspace }}/app/scripts/pipboy.service
           sudo cp -v ${{ github.workspace }}/app/scripts/pipboy.service /etc/systemd/system/pipboy.service
+          sudo chmod 644 /etc/systemd/system/pipboy.service
           sudo systemctl daemon-reload -v ||echo "Daemon-Reload had no output, should means success"
 
       - name: Permissions & Restart
