@@ -39,7 +39,7 @@ jobs:
       - name: Bundle scripts
         run: |
           mkdir -p ./publish/scripts
-          cp -r ./src/scripts/ ./publish/scripts/          
+          cp -r ./src/scripts/. ./publish/scripts/          
           chmod +x ./publish/scripts/*.sh
 
       - name: Upload Artifact
