@@ -38,7 +38,9 @@ jobs:
 
           mkdir -p ./publish/scripts
           cp ./src/scripts/launch_pipboy.sh ./publish/scripts/
+          cp ./src/scripts/pipboy.service ./publish/scripts/
           chmod +x ./publish/scripts/launch_pipboy.sh
+          chmod +x ./publish/scripts/pipboy.service
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
