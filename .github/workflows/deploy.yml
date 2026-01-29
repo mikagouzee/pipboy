@@ -46,14 +46,26 @@ jobs:
     needs: build
     runs-on: self-hosted # This runs on the Pi
     steps:
+      - name : Shutdown app
+        run : |
+          # pkill -f Pipboy || echo "No existing app process found"
+          sudo systemctl stop pipboy.service || echo "No existing service found"
+
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           name: pipboy-bundle # Name of the artifact zip
-          path: ./app  # Destination folder on the Pi. Magically knows it must take the artifact from .publish
+          path: ${{ github.workspace }}/app  # Destination folder on the Pi. Magically knows it must take the artifact from .publish
+
+      - name : Verify Download
+        run: ls -R ${{ github.workspace }}/app
 
       - name: Permissions & Restart
         run: |
           chmod +x ./app/Pipboy
           chmod +x ./src/scripts/start.sh
           echo "App is updated in ~/actions-runner/_work/${{ github.event.repository.name }}/${{ github.event.repository.name }}/app"
+
+      - name: Start app
+        run : |
+          sudo systemctl start pipboy.service || echo "Service failed to start"
