@@ -84,20 +84,15 @@ jobs:
         run : |
           set -x
           #start all pipboy services
-          sudo systemctl restart "pipboy*.service" || {
-            echo "--- DEBUG: One or more services failed to restart ---"
-            # Loop through the services to find the failure and print logs
-            for service in $(ls /etc/systemd/system/pipboy*.service | xargs basename); do
-               echo "Checking status for $service..."
-               sudo systemctl is-active --quiet $service || {
-                 echo "FAIL: $service is not running."
-                 sudo journalctl -u $service -n 20 --no-pager
-               }
-            done
+          sudo systemctl daemon-reload
+
+          sudo systemctl restart pipboy.service pipboy-kiosk.service || {
+          echo "--- DEBUG: Failure detected ---"
+            sudo systemctl status pipboy.service --no-pager
+            sudo systemctl status pipboy-kiosk.service --no-pager
             exit 1
           }
-          sleep 2
-          sudo systemctl is-active "pipboy*.service" || {
-            echo "ERROR: One or more services are not active after start command."
-            exit 1
-          }
+
+          # Final verification
+          sudo systemctl is-active pipboy.service
+          sudo systemctl is-active pipboy-kiosk.service
