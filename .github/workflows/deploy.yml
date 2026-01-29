@@ -81,6 +81,11 @@ jobs:
 
       - name: Start app
         run : |
-          sudo systemctl start pipboy.service
+          set -x
+          sudo systemctl start pipboy.service || {
+            echo "Failed to start pipboy.service"
+            sudo journalctl -u pipboy.service -n 20 --no-pager --since "5 minutes ago"
+            exit 1
+          }
           sleep 2
           sudo systemctl is-active pipboy.service
