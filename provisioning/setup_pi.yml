@@ -22,7 +22,8 @@
           - xdotool
           - chromium
           - libssl-dev
-          - libicu-dev  # Required for .NET globalization
+          - libicu-dev
+          - unclutter
         state: present
 
     - name: Configure Passwordless Sudo for CI/CD
@@ -57,8 +58,21 @@
         name: nodejs
         state: present
 
-    # --- CLEANUP & VALIDATION ---
-    - name: Ensure .bashrc has .NET paths for interactive sessions
+    # --- SYSTEM CONFIGURATION ---
+    - name: Enable SPI Interface
+      lineinfile:
+        path: /boot/firmware/config.txt
+        line: 'dtparam=spi=on'
+        state: present
+
+    - name: Force X11 instead of Wayland (Trixie/LightDM)
+      lineinfile:
+        path: /etc/lightdm/lightdm.conf
+        regexp: '^#?xserver-command='
+        line: 'xserver-command=X -s 0 -dpms'
+      notify: Restart LightDM
+
+    - name: Ensure .bashrc has .NET paths
       become_user: "{{ target_user }}"
       lineinfile:
         path: "/home/{{ target_user }}/.bashrc"
@@ -67,14 +81,16 @@
         - 'export DOTNET_ROOT=$HOME/.dotnet'
         - 'export PATH=$PATH:$HOME/.dotnet'
 
-    - name: Verify Installations
-      become_user: "{{ target_user }}"
-      shell: |
-        /home/{{ target_user }}/.dotnet/dotnet --version
-        node --version
-      register: versions_output
-      changed_when: false
+    - name: Enable PipBoy Services
+      systemd:
+        name: "{{ item }}"
+        enabled: yes
+      with_items:
+        - pipboy.service
+        - pipboy-kiosk.service
 
-    - name: Display Versions
-      debug:
-        var: versions_output.stdout_lines
+  handlers:
+    - name: Restart LightDM
+      service:
+        name: lightdm
+        state: restarted

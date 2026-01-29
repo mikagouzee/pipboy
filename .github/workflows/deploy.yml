@@ -92,6 +92,8 @@ jobs:
             sudo systemctl status pipboy-kiosk.service --no-pager
             exit 1
           }
+          #make them start on boot
+          sudo systemctl enable pipboy.service pipboy-kiosk.service
 
           # Final verification
           sudo systemctl is-active pipboy.service

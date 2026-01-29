@@ -28,6 +28,9 @@ chromium  \
     --noerrdialogs \
     --disable-infobars \
     --disable-session-crashed-bubble \
+    --ozone-platform=X11 \
+    --disable-gpu \
+    --disable-software-rasterizer \
     --check-for-update-interval=31536000 \
     --remote-debugging-port=9222 \
     "$URL"
