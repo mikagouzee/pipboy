@@ -1,0 +1,17 @@
+[Unit]
+Description=PipBoy Kiosk UI
+After=pipboy.service
+Wants=pipboy.service
+
+[Service]
+User=vaultdweller
+Group=vaultdweller
+Environment=DISPLAY=:0
+#this line is required to interact with desktop session
+Environment=XAUTHORITY=/home/vaultdweller/.Xauthority
+ExecStart=/home/vaultdweller/actions-runner/_work/pipboy/pipboy/app/scripts/launch_pipboy.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

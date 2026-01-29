@@ -37,9 +37,8 @@ jobs:
             --self-contained false
 
           mkdir -p ./publish/scripts
-          cp ./src/scripts/launch_pipboy.sh ./publish/scripts/
-          cp ./src/scripts/pipboy.service ./publish/scripts/
-          chmod +x ./publish/scripts/launch_pipboy.sh
+          cp ./src/scripts/ ./publish/scripts/          
+          chmod +x ./publish/scripts/*.sh
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -68,9 +67,9 @@ jobs:
       - name: Sync Systemd service
         run: |
           set -x
-          ls -lh ${{ github.workspace }}/app/scripts/pipboy.service
-          sudo cp -v ${{ github.workspace }}/app/scripts/pipboy.service /etc/systemd/system/pipboy.service
-          sudo chmod 644 /etc/systemd/system/pipboy.service
+          sudo cp -v ${{ github.workspace }}/app/scripts/*.service /etc/systemd/system/
+          
+          sudo chmod 644 /etc/systemd/system/pipboy*.service
           sudo systemctl daemon-reload -v ||echo "Daemon-Reload had no output, should means success"
 
       - name: Permissions & Restart
@@ -82,10 +81,21 @@ jobs:
       - name: Start app
         run : |
           set -x
-          sudo systemctl start pipboy.service || {
-            echo "Failed to start pipboy.service"
-            sudo journalctl -u pipboy.service -n 20 --no-pager --since "5 minutes ago"
+          #start all pipboy services
+          sudo systemctl restart "pipboy*.service" || {
+            echo "--- DEBUG: One or more services failed to restart ---"
+            # Loop through the services to find the failure and print logs
+            for service in $(ls /etc/systemd/system/pipboy*.service | xargs basename); do
+               echo "Checking status for $service..."
+               sudo systemctl is-active --quiet $service || {
+                 echo "FAIL: $service is not running."
+                 sudo journalctl -u $service -n 20 --no-pager
+               }
+            done
             exit 1
           }
           sleep 2
-          sudo systemctl is-active pipboy.service
+          sudo systemctl is-active "pipboy*.service" || {
+            echo "ERROR: One or more services are not active after start command."
+            exit 1
+          }

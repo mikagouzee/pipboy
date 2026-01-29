@@ -1,0 +1,80 @@
+---
+- name: Provision PipBoy Raspberry Pi
+  hosts: pipboys
+  become: yes
+  vars:
+    target_user: vaultdweller
+    dotnet_version: "9.0"
+    node_version: "22"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install System Dependencies
+      apt:
+        name:
+          - curl
+          - git
+          - x11-xserver-utils
+          - xdotool
+          - chromium
+          - libssl-dev
+          - libicu-dev  # Required for .NET globalization
+        state: present
+
+    - name: Configure Passwordless Sudo for CI/CD
+      lineinfile:
+        path: /etc/sudoers.d/pipboy_deploy
+        line: "{{ target_user }} ALL=(ALL) NOPASSWD: /usr/bin/systemctl, /usr/bin/cp, /usr/bin/chmod"
+        create: yes
+        mode: '0440'
+        validate: '/usr/sbin/visudo -cf %s'
+
+    # --- .NET INSTALLATION ---
+    - name: Download .NET install script
+      get_url:
+        url: https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh
+        dest: /tmp/dotnet-install.sh
+        mode: '0755'
+
+    - name: Install .NET Runtime
+      become_user: "{{ target_user }}"
+      shell: "/tmp/dotnet-install.sh --channel {{ dotnet_version }} --install-dir /home/{{ target_user }}/.dotnet --runtime dotnet"
+      args:
+        creates: "/home/{{ target_user }}/.dotnet/dotnet"
+
+    # --- NODE.JS INSTALLATION ---
+    - name: Add NodeSource repository
+      shell: "curl -fsSL https://deb.nodesource.com/setup_{{ node_version }}.x | bash -"
+      args:
+        creates: /etc/apt/sources.list.d/nodesource.list
+
+    - name: Install Node.js
+      apt:
+        name: nodejs
+        state: present
+
+    # --- CLEANUP & VALIDATION ---
+    - name: Ensure .bashrc has .NET paths for interactive sessions
+      become_user: "{{ target_user }}"
+      lineinfile:
+        path: "/home/{{ target_user }}/.bashrc"
+        line: "{{ item }}"
+      with_items:
+        - 'export DOTNET_ROOT=$HOME/.dotnet'
+        - 'export PATH=$PATH:$HOME/.dotnet'
+
+    - name: Verify Installations
+      become_user: "{{ target_user }}"
+      shell: |
+        /home/{{ target_user }}/.dotnet/dotnet --version
+        node --version
+      register: versions_output
+      changed_when: false
+
+    - name: Display Versions
+      debug:
+        var: versions_output.stdout_lines
