@@ -55,4 +55,5 @@ jobs:
       - name: Permissions & Restart
         run: |
           chmod +x ./app/Pipboy
+          chmod +x ./src/scripts/start.sh
           echo "App is updated in ~/actions-runner/_work/${{ github.event.repository.name }}/${{ github.event.repository.name }}/app"
