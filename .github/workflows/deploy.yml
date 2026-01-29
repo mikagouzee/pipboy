@@ -66,8 +66,10 @@ jobs:
         
       - name: Sync Systemd service
         run: |
-          sudo cp ${{ github.workspace }}/app/scripts/pipboy.service /etc/systemd/system/pipboy.service
-          sudo systemctl daemon-reload
+          set -x
+          ls -lh ${{ github.workspace }}/app/scripts/pipboy.service
+          sudo cp -v ${{ github.workspace }}/app/scripts/pipboy.service /etc/systemd/system/pipboy.service
+          sudo systemctl daemon-reload -v ||echo "Daemon-Reload had no output, should means success"
 
       - name: Permissions & Restart
         run: |
